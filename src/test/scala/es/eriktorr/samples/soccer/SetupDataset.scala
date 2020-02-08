@@ -9,7 +9,7 @@ abstract class SetupDataset extends FlatSpec with Matchers with DatasetSuiteBase
 
   implicit def sparkSession: SparkSession = spark
 
-  val pathToFile: String => String = {
+  val pathTo: String => String = {
     getClass.getClassLoader.getResource(_).getPath
   }
 }

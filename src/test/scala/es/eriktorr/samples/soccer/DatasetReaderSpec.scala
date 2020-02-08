@@ -2,7 +2,7 @@ package es.eriktorr.samples.soccer
 
 class DatasetReaderSpec extends SetupDataset {
   "Dataset reader" should "load countries from CSV file" in {
-    val countries = DatasetReader[Country].datasetFrom(pathToFile("data/country.csv.bz2"))
+    val countries = DatasetReader[Country].datasetFrom(pathTo("data/country.csv.bz2"))
     assertDatasetEquals(expectedCountries(), countries)
   }
 
