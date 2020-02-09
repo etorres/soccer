@@ -1,12 +1,10 @@
 package es.eriktorr.samples.soccer
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import org.apache.spark.sql.Dataset
 
-class ScoreSpec extends SetupDataset {
+class ScoreCalculatorSpec extends SetupDataset with DateTimeUtils {
   "Score calculator" should "add team scores to matches that happened after a given date" in {
     import spark.implicits._
     val matches = DatasetReader[Match].datasetFrom(pathTo("data/match.csv.bz2"))
@@ -29,10 +27,6 @@ class ScoreSpec extends SetupDataset {
       home_team_score = 1,
       away_team_score = 1)).toDF.as[MatchWithScore]
   }
-
-  val timestampFrom: String => Timestamp = (str: String) => Timestamp.valueOf(str)
-
-  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
   lazy val august2011: LocalDateTime = LocalDateTime.parse("2011-08-01 00:00:00", dateTimeFormatter)
 }
