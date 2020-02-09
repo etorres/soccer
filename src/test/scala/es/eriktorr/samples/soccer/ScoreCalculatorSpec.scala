@@ -18,6 +18,7 @@ class ScoreCalculatorSpec extends SetupDataset with DateTimeUtils {
     Seq(MatchWithScore(id = 16446,
       country_id = 15722,
       league_id = 15722,
+      season = "2011/2012",
       date = timestampFrom("2011-08-01 00:00:00"),
       match_api_id = 1030794,
       home_team_api_id = 8033,

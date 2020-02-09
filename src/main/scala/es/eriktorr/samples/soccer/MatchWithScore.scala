@@ -5,6 +5,7 @@ import java.sql.Timestamp
 case class MatchWithScore(id: Int,
                           country_id: Int,
                           league_id: Int,
+                          season: String,
                           date: Timestamp,
                           match_api_id: Int,
                           home_team_api_id: Int,
