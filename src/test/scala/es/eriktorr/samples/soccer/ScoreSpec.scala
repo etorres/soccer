@@ -1,29 +1,38 @@
 package es.eriktorr.samples.soccer
 
 import java.sql.Timestamp
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.Dataset
 
 class ScoreSpec extends SetupDataset {
-  "test" should "work" in {
+  "Score calculator" should "add team scores to matches that happened after a given date" in {
     import spark.implicits._
-    DatasetReader[Match].datasetFrom(pathTo("data/match.csv.bz2"))
-      .withColumn("score", udfScore('home_team_goal, 'away_team_goal))
-      .select('id, 'country_id, 'league_id, 'date, 'home_team_api_id, 'away_team_api_id, 'home_team_goal, 'away_team_goal,
-        $"score._1" as "home_team_score", $"score._2" as "away_team_score")
-      .filter('date >= Timestamp.valueOf("2011-08-01 00:00:00"))
-      .show(false)
-
-    // TODO
-
+    val matches = DatasetReader[Match].datasetFrom(pathTo("data/match.csv.bz2"))
+    val matchesWithScore = ScoreCalculator().score(matches, august2011)
+    matchesWithScore.count() shouldBe 16124
+    assertDatasetEquals(expectedMatches(), matchesWithScore.orderBy('date).limit(1))
   }
 
-  val scoreFrom: (Int, Int) => (Int, Int) = (x: Int, y: Int) => (x, y) match {
-    case (x, y) if x > y => (3, 0)
-    case (x, y) if x < y => (0, 3)
-    case _ => (1, 1)
+  private def expectedMatches(): Dataset[MatchWithScore] = {
+    import spark.implicits._
+    Seq(MatchWithScore(id = 16446,
+      country_id = 15722,
+      league_id = 15722,
+      date = timestampFrom("2011-08-01 00:00:00"),
+      match_api_id = 1030794,
+      home_team_api_id = 8033,
+      away_team_api_id = 1957,
+      home_team_goal = 2,
+      away_team_goal = 2,
+      home_team_score = 1,
+      away_team_score = 1)).toDF.as[MatchWithScore]
   }
 
-  lazy val udfScore: UserDefinedFunction = udf[(Int, Int), Int, Int](scoreFrom)
+  val timestampFrom: String => Timestamp = (str: String) => Timestamp.valueOf(str)
+
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+  lazy val august2011: LocalDateTime = LocalDateTime.parse("2011-08-01 00:00:00", dateTimeFormatter)
 }
