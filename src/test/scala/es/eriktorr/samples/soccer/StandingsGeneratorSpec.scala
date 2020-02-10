@@ -3,7 +3,7 @@ package es.eriktorr.samples.soccer
 import java.time.LocalDateTime
 import org.apache.spark.sql.functions._
 
-class Top10Spec extends SetupDataset with DateTimeUtils {
+class StandingsGeneratorSpec extends SetupDataset with DateTimeUtils {
   "test" should "work" in {
     import spark.implicits._
     val matches = DatasetReader[Match].datasetFrom(pathTo("data/match.csv.bz2"))
@@ -21,7 +21,10 @@ class Top10Spec extends SetupDataset with DateTimeUtils {
 
     home_team.union(away_team)
       .cube('country_id, 'league_id, 'season, 'team_api_id)
-      .agg(count('team_api_id) as "played", sum('team_goal) as "goals_for", sum('team_score) as "points")
+      .agg(count('team_api_id) as "played", count(when('team_score === 3, 1)) as "won",
+        count(when('team_score === 1, 1)) as "drawn",
+        count(when('team_score === 0, 1)) as "lost",
+        sum('team_goal) as "goals_for", sum('team_score) as "points")
       .filter('country_id.isNotNull && 'league_id.isNotNull && 'season.isNotNull && 'team_api_id.isNotNull)
       .sort('season.desc_nulls_first, 'points.desc_nulls_first)
       .where('league_id === 21518)
