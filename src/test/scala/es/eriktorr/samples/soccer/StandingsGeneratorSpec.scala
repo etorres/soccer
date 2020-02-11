@@ -1,7 +1,5 @@
 package es.eriktorr.samples.soccer
 
-import java.time.LocalDateTime
-
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
@@ -10,7 +8,7 @@ class StandingsGeneratorSpec extends SetupDataset with DateTimeUtils {
     import spark.implicits._
     val matches = DatasetReader[Match].datasetFrom(pathTo("data/match.csv.bz2"))
     val matchesWithScore = ScoreCalculator()
-      .score(matches, august2000)
+      .score(matches)
       .cache()
 
     val home_team = matchesWithScore.select('league_id, 'season, 'home_team_api_id, 'home_team_goal, 'away_team_goal, 'home_team_score)
@@ -51,6 +49,4 @@ class StandingsGeneratorSpec extends SetupDataset with DateTimeUtils {
       .show(20, truncate = false)
 
   }
-
-  lazy val august2000: LocalDateTime = LocalDateTime.parse("2000-08-01 00:00:00", dateTimeFormatter)
 }

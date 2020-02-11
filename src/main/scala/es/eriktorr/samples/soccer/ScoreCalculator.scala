@@ -12,13 +12,12 @@ object ScoreCalculator {
 }
 
 class ScoreCalculator extends SparkSessionProvider {
-  def score(matches: Dataset[Match], startingDate: LocalDateTime): Dataset[MatchWithScore] = {
+  def score(matches: Dataset[Match]): Dataset[MatchWithScore] = {
     import spark.implicits._
     matches
       .withColumn("score", udfScore('home_team_goal, 'away_team_goal))
       .select('id, 'country_id, 'league_id, 'season, 'date, 'match_api_id, 'home_team_api_id, 'away_team_api_id,
         'home_team_goal, 'away_team_goal, $"score._1" as "home_team_score", $"score._2" as "away_team_score")
-      .filter('date >= Timestamp.valueOf(startingDate))
       .as[MatchWithScore]
   }
 
